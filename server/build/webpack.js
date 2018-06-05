@@ -26,7 +26,7 @@ const interpolateNames = new Map(defaultPages.map((p) => {
 
 const relativeResolve = rootModuleRelativePath(require)
 
-export default async function createCompiler (dir, { dev = false, quiet = false, buildDir } = {}) {
+export default async function createCompiler(dir, { dev = false, quiet = false, buildDir } = {}) {
   dir = resolve(dir)
   const config = getConfig(dir)
   const defaultEntries = dev ? [
@@ -78,7 +78,7 @@ export default async function createCompiler (dir, { dev = false, quiet = false,
     new webpack.LoaderOptionsPlugin({
       options: {
         context: dir,
-        customInterpolateName (url, name, opts) {
+        customInterpolateName(url, name, opts) {
           return interpolateNames.get(this.resourcePath) || url
         }
       }
@@ -92,7 +92,7 @@ export default async function createCompiler (dir, { dev = false, quiet = false,
     new webpack.optimize.CommonsChunkPlugin({
       name: 'commons',
       filename: 'commons.js',
-      minChunks (module, count) {
+      minChunks(module, count) {
         // In the dev we use on-demand-entries.
         // So, it makes no sense to use commonChunks based on the minChunks count.
         // Instead, we move all the code in node_modules into this chunk.
@@ -113,9 +113,9 @@ export default async function createCompiler (dir, { dev = false, quiet = false,
       name: 'manifest',
       filename: 'manifest.js'
     }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production')
-    }),
+    // new webpack.DefinePlugin({
+    //   'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production')
+    // }),
     new JsonPagesPlugin(),
     new CaseSensitivePathPlugin()
   ]
@@ -135,10 +135,10 @@ export default async function createCompiler (dir, { dev = false, quiet = false,
         input: ['manifest.js', 'commons.js', 'main.js'],
         output: 'app.js'
       }),
-      new webpack.optimize.UglifyJsPlugin({
-        compress: { warnings: false },
-        sourceMap: false
-      })
+      // new webpack.optimize.UglifyJsPlugin({
+      //   compress: { warnings: false },
+      //   sourceMap: false
+      // })
     )
   }
 
@@ -182,84 +182,84 @@ export default async function createCompiler (dir, { dev = false, quiet = false,
     loader: 'react-hot-loader/webpack',
     exclude: /node_modules/
   }] : [])
-  .concat([{
-    test: /\.json$/,
-    loader: 'json-loader'
-  }, {
-    test: /\.(js|json)(\?[^?]*)?$/,
-    loader: 'emit-file-loader',
-    include: [dir, nextPagesDir],
-    exclude (str) {
-      return /node_modules/.test(str) && str.indexOf(nextPagesDir) !== 0
-    },
-    options: {
-      name: 'dist/[path][name].[ext]',
-      // By default, our babel config does not transpile ES2015 module syntax because
-      // webpack knows how to handle them. (That's how it can do tree-shaking)
-      // But Node.js doesn't know how to handle them. So, we have to transpile them here.
-      transform ({ content, sourceMap, interpolatedName }) {
-        // Only handle .js files
-        if (!(/\.js$/.test(interpolatedName))) {
-          return { content, sourceMap }
-        }
+    .concat([{
+      test: /\.json$/,
+      loader: 'json-loader'
+    }, {
+      test: /\.(js|json)(\?[^?]*)?$/,
+      loader: 'emit-file-loader',
+      include: [dir, nextPagesDir],
+      exclude(str) {
+        return /node_modules/.test(str) && str.indexOf(nextPagesDir) !== 0
+      },
+      options: {
+        name: 'dist/[path][name].[ext]',
+        // By default, our babel config does not transpile ES2015 module syntax because
+        // webpack knows how to handle them. (That's how it can do tree-shaking)
+        // But Node.js doesn't know how to handle them. So, we have to transpile them here.
+        transform({ content, sourceMap, interpolatedName }) {
+          // Only handle .js files
+          if (!(/\.js$/.test(interpolatedName))) {
+            return { content, sourceMap }
+          }
 
-        const transpiled = babelCore.transform(content, {
-          babelrc: false,
-          sourceMaps: dev ? 'both' : false,
-          // Here we need to resolve all modules to the absolute paths.
-          // Earlier we did it with the babel-preset.
-          // But since we don't transpile ES2015 in the preset this is not resolving.
-          // That's why we need to do it here.
-          // See more: https://github.com/zeit/next.js/issues/951
-          plugins: [
-            [require.resolve('babel-plugin-transform-es2015-modules-commonjs')],
-            [
-              require.resolve('babel-plugin-module-resolver'),
-              {
-                alias: {
-                  'babel-runtime': relativeResolve('babel-runtime/package'),
-                  'next/link': relativeResolve('../../lib/link'),
-                  'next/prefetch': relativeResolve('../../lib/prefetch'),
-                  'next/css': relativeResolve('../../lib/css'),
-                  'next/head': relativeResolve('../../lib/head'),
-                  'next/document': relativeResolve('../../server/document'),
-                  'next/router': relativeResolve('../../lib/router'),
-                  'next/error': relativeResolve('../../lib/error'),
-                  'styled-jsx/style': relativeResolve('styled-jsx/style')
+          const transpiled = babelCore.transform(content, {
+            babelrc: false,
+            sourceMaps: dev ? 'both' : false,
+            // Here we need to resolve all modules to the absolute paths.
+            // Earlier we did it with the babel-preset.
+            // But since we don't transpile ES2015 in the preset this is not resolving.
+            // That's why we need to do it here.
+            // See more: https://github.com/zeit/next.js/issues/951
+            plugins: [
+              [require.resolve('babel-plugin-transform-es2015-modules-commonjs')],
+              [
+                require.resolve('babel-plugin-module-resolver'),
+                {
+                  alias: {
+                    'babel-runtime': relativeResolve('babel-runtime/package'),
+                    'next/link': relativeResolve('../../lib/link'),
+                    'next/prefetch': relativeResolve('../../lib/prefetch'),
+                    'next/css': relativeResolve('../../lib/css'),
+                    'next/head': relativeResolve('../../lib/head'),
+                    'next/document': relativeResolve('../../server/document'),
+                    'next/router': relativeResolve('../../lib/router'),
+                    'next/error': relativeResolve('../../lib/error'),
+                    'styled-jsx/style': relativeResolve('styled-jsx/style')
+                  }
                 }
-              }
-            ]
-          ],
-          inputSourceMap: sourceMap
-        })
+              ]
+            ],
+            inputSourceMap: sourceMap
+          })
 
-        return {
-          content: transpiled.code,
-          sourceMap: transpiled.map
+          return {
+            content: transpiled.code,
+            sourceMap: transpiled.map
+          }
         }
       }
-    }
-  }, {
-    loader: 'babel-loader',
-    include: nextPagesDir,
-    exclude (str) {
-      return /node_modules/.test(str) && str.indexOf(nextPagesDir) !== 0
-    },
-    options: {
-      babelrc: false,
-      cacheDirectory: true,
-      sourceMaps: dev ? 'both' : false,
-      presets: [require.resolve('./babel/preset')]
-    }
-  }, {
-    test: /\.js(\?[^?]*)?$/,
-    loader: 'babel-loader',
-    include: [dir],
-    exclude (str) {
-      return /node_modules/.test(str)
-    },
-    options: mainBabelOptions
-  }])
+    }, {
+      loader: 'babel-loader',
+      include: nextPagesDir,
+      exclude(str) {
+        return /node_modules/.test(str) && str.indexOf(nextPagesDir) !== 0
+      },
+      options: {
+        babelrc: false,
+        cacheDirectory: true,
+        sourceMaps: dev ? 'both' : false,
+        presets: [require.resolve('./babel/preset')]
+      }
+    }, {
+      test: /\.js(\?[^?]*)?$/,
+      loader: 'babel-loader',
+      include: [dir],
+      exclude(str) {
+        return /node_modules/.test(str)
+      },
+      options: mainBabelOptions
+    }])
 
   let webpackConfig = {
     context: dir,
@@ -270,7 +270,7 @@ export default async function createCompiler (dir, { dev = false, quiet = false,
       libraryTarget: 'commonjs2',
       publicPath: '/_webpack/',
       strictModuleExceptionHandling: true,
-      devtoolModuleFilenameTemplate ({ resourcePath }) {
+      devtoolModuleFilenameTemplate({ resourcePath }) {
         const hash = createHash('sha1')
         hash.update(Date.now() + '')
         const id = hash.digest('hex').slice(0, 7)

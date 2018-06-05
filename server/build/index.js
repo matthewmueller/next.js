@@ -7,9 +7,9 @@ import webpack from './webpack'
 import replaceCurrentBuild from './replace'
 import md5File from 'md5-file/promise'
 
-export default async function build (dir) {
+export default async function build(dir, dev) {
   const buildDir = join(tmpdir(), uuid.v4())
-  const compiler = await webpack(dir, { buildDir })
+  const compiler = await webpack(dir, { buildDir, dev })
 
   try {
     await runCompiler(compiler)
@@ -26,7 +26,7 @@ export default async function build (dir) {
   del(buildDir, { force: true })
 }
 
-function runCompiler (compiler) {
+function runCompiler(compiler) {
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
       if (err) return reject(err)
@@ -45,7 +45,7 @@ function runCompiler (compiler) {
   })
 }
 
-async function writeBuildStats (dir) {
+async function writeBuildStats(dir) {
   // Here we can't use hashes in webpack chunks.
   // That's because the "app.js" is not tied to a chunk.
   // It's created by merging a few assets. (commons.js and main.js)
@@ -59,7 +59,7 @@ async function writeBuildStats (dir) {
   await fs.writeFile(buildStatsPath, JSON.stringify(assetHashMap), 'utf8')
 }
 
-async function writeBuildId (dir) {
+async function writeBuildId(dir) {
   const buildIdPath = join(dir, '.next', 'BUILD_ID')
   const buildId = uuid.v4()
   await fs.writeFile(buildIdPath, buildId, 'utf8')

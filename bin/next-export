@@ -51,8 +51,8 @@ if (!existsSync(join(dir, 'pages'))) {
 }
 
 Build(dir)
-.then(() => Export({ dir, out }))
-.catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+  .then(() => Export({ dir, out }))
+  .catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
