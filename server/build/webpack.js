@@ -113,9 +113,9 @@ export default async function createCompiler(dir, { dev = false, quiet = false, 
       name: 'manifest',
       filename: 'manifest.js'
     }),
-    // new webpack.DefinePlugin({
-    //   'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production')
-    // }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production')
+    }),
     new JsonPagesPlugin(),
     new CaseSensitivePathPlugin()
   ]
@@ -135,10 +135,10 @@ export default async function createCompiler(dir, { dev = false, quiet = false, 
         input: ['manifest.js', 'commons.js', 'main.js'],
         output: 'app.js'
       }),
-      // new webpack.optimize.UglifyJsPlugin({
-      //   compress: { warnings: false },
-      //   sourceMap: false
-      // })
+      new webpack.optimize.UglifyJsPlugin({
+        compress: { warnings: false },
+        sourceMap: false
+      })
     )
   }
 
