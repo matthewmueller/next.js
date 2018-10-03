@@ -1,5 +1,5 @@
 {
-  "name": "next",
+  "name": "static-next",
   "version": "2.0.1",
   "description": "Minimalistic framework for server-rendered React applications",
   "main": "./dist/server/next.js",
